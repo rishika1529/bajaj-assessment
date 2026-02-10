@@ -9,7 +9,7 @@ import requests
 app = FastAPI(title="BFHL API")
 
 OFFICIAL_EMAIL = os.getenv("OFFICIAL_EMAIL", "rishika2193.be23@chitkara.edu.in")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 def fibonacci_series(n: int) -> List[int]:
     if n < 0:
