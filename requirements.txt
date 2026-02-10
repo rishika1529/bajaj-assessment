@@ -1,8 +1,9 @@
 fastapi
-openai
-langchain-openai
-pydantic
-python-dotenv
-langchain
 uvicorn
-requests
+python-dotenv
+
+langchain
+langchain-openai
+openai
+
+pydantic
