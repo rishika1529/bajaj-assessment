@@ -1,18 +1,19 @@
-
 import os
 import math
 from typing import List
 from fastapi import FastAPI
 from pydantic import BaseModel, root_validator
 import requests
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-import os
 
 app = FastAPI(title="BFHL API")
 
-OFFICIAL_EMAIL = os.getenv("OFFICIAL_EMAIL", "rishika2193.be23@chitkara.edu.in")
+OFFICIAL_EMAIL = os.getenv(
+    "OFFICIAL_EMAIL",
+    "rishika2193.be23@chitkara.edu.in"
+)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# ---------- Utility Functions ----------
 
 def fibonacci_series(n: int) -> List[int]:
     if n < 0:
@@ -21,10 +22,12 @@ def fibonacci_series(n: int) -> List[int]:
         return []
     if n == 1:
         return [0]
+
     series = [0, 1]
     while len(series) < n:
         series.append(series[-1] + series[-2])
     return series
+
 
 def filter_primes(arr: List[int]) -> List[int]:
     def is_prime(x: int) -> bool:
@@ -34,15 +37,19 @@ def filter_primes(arr: List[int]) -> List[int]:
             if x % i == 0:
                 return False
         return True
+
     return [x for x in arr if is_prime(x)]
+
 
 def compute_lcm(arr: List[int]) -> int:
     def lcm(a, b):
         return abs(a * b) // math.gcd(a, b)
+
     result = arr[0]
     for num in arr[1:]:
         result = lcm(result, num)
     return result
+
 
 def compute_hcf(arr: List[int]) -> int:
     result = arr[0]
@@ -50,43 +57,44 @@ def compute_hcf(arr: List[int]) -> int:
         result = math.gcd(result, num)
     return result
 
-# def ask_gemini(question: str) -> str:
-#     if not GEMINI_API_KEY:
-#         return "AI_KEY_NOT_CONFIGURED"
-#     # url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
-#     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
-#     payload = {"contents": [{"parts": [{"text": question}]}]}
-#     response = requests.post(url, json=payload, timeout=10)
-#     if response.status_code != 200:
-#         return "AI_ERROR"
-#     data = response.json()
-#     try:
-#         text = data["candidates"][0]["content"]["parts"][0]["text"]
-#         return text.strip().split()[0]
-#     except Exception:
-#         return "UNKNOWN"
-
-
-
-llm = ChatOpenAI(
-    model="gpt-4.1-mini",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    temperature=0
-)
-
-prompt = ChatPromptTemplate.from_template(
-    "Answer in one word only: {question}"
-)
+# ---------- Gemini AI ----------
 
 def ask_gemini(question: str) -> str:
+    if not GEMINI_API_KEY:
+        return "AI_KEY_NOT_CONFIGURED"
+
+    url = (
+        "https://generativelanguage.googleapis.com/v1beta/"
+        f"models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+    )
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": f"Answer in one word only: {question}"}
+                ]
+            }
+        ]
+    }
+
     try:
-        chain = prompt | llm
-        response = chain.invoke({"question": question})
-        return response.content.strip().split()[0]
+        response = requests.post(url, json=payload, timeout=10)
+
+        if response.status_code != 200:
+            return "AI_ERROR"
+
+        data = response.json()
+
+        text = data["candidates"][0]["content"]["parts"][0]["text"]
+        return text.strip().split()[0]
+
     except Exception:
         return "UNKNOWN"
 
+
+# ---------- Request Schema ----------
 
 class BFHLRequest(BaseModel):
     fibonacci: int | None = None
@@ -102,6 +110,10 @@ class BFHLRequest(BaseModel):
             raise ValueError("Exactly one key must be provided.")
         return values
 
+
+# ---------- Routers ----------
+
 from .routers import bfhl, health
+
 app.include_router(bfhl.router)
 app.include_router(health.router)
