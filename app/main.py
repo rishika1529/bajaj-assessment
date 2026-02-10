@@ -76,22 +76,23 @@ def ask_gemini(question: str) -> str:
                     {"text": question}
                 ]
             }
-        ]
+        ],
+        "generationConfig": {
+            "temperature": 0.2,
+            "maxOutputTokens": 50
+        }
     }
 
     headers = {"Content-Type": "application/json"}
 
-    response = requests.post(url, headers=headers, json=payload)
-
-    if response.status_code != 200:
-        print(response.text)
-        return "AI_ERROR"
-
-    data = response.json()
-
     try:
+        response = requests.post(url, headers=headers, json=payload, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+
         text = data["candidates"][0]["content"]["parts"][0]["text"]
         return text.strip().split()[0]
+
     except Exception:
         return "UNKNOWN"
 
