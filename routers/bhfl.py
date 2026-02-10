@@ -32,39 +32,33 @@ def health_check():
 )
 def bfhl_handler(payload: BFHLRequest):
 
-    if payload.fibonacci is not None:
-        data = fibonacci_series(payload.fibonacci)
+    try:
+        if payload.fibonacci is not None:
+            data = fibonacci_series(payload.fibonacci)
 
-    elif payload.prime is not None:
-        data = filter_primes(payload.prime)
+        elif payload.prime is not None:
+            data = filter_primes(payload.prime)
 
-    elif payload.lcm is not None:
-        data = find_lcm(payload.lcm)
+        elif payload.lcm is not None:
+            data = find_lcm(payload.lcm)
 
-    elif payload.hcf is not None:
-        data = find_hcf(payload.hcf)
+        elif payload.hcf is not None:
+            data = find_hcf(payload.hcf)
 
-    elif payload.AI is not None:
-        try:
+        elif payload.AI is not None:
             data = ask_ai(payload.AI)
-        except Exception as e:
-            return {
-                "is_success": False,
-                "official_email": EMAIL,
-                "error": str(e)
-            }
 
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Exactly one key is required"
-        )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Exactly one key is required"
+            )
 
-    return {
-        "is_success": True,
-        "official_email": EMAIL,
-        "data": data
-    }
+        return {
+            "is_success": True,
+            "official_email": EMAIL,
+            "data": data
+        }
 
     except HTTPException:
         raise
@@ -74,4 +68,5 @@ def bfhl_handler(payload: BFHLRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
+
 
