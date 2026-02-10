@@ -69,29 +69,27 @@ def ask_gemini(question: str) -> str:
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
+    prompt = f"Answer in one word only: {question}"
+
     payload = {
         "contents": [
-            {
-                "parts": [
-                    {"text": question}
-                ]
-            }
-        ],
-        "generationConfig": {
-            "temperature": 0.2,
-            "maxOutputTokens": 50
-        }
+            {"parts": [{"text": prompt}]}
+        ]
     }
 
     headers = {"Content-Type": "application/json"}
 
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=15)
-        response.raise_for_status()
         data = response.json()
 
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
-        return text.strip().split()[0]
+        candidates = data.get("candidates", [])
+        if candidates:
+            parts = candidates[0].get("content", {}).get("parts", [])
+            if parts:
+                return parts[0]["text"].strip().split()[0]
+
+        return "UNKNOWN"
 
     except Exception:
         return "UNKNOWN"
