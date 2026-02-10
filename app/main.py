@@ -50,7 +50,9 @@ def compute_hcf(arr: List[int]) -> int:
 def ask_gemini(question: str) -> str:
     if not GEMINI_API_KEY:
         return "AI_KEY_NOT_CONFIGURED"
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
+    # url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+
     payload = {"contents": [{"parts": [{"text": question}]}]}
     response = requests.post(url, json=payload, timeout=10)
     if response.status_code != 200:

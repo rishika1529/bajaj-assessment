@@ -1,3 +1,6 @@
 fastapi
+pydantic
+python-dotenv
+langchain
 uvicorn
 requests
