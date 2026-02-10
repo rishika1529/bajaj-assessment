@@ -1,4 +1,6 @@
 fastapi
+openai
+langchain-openai
 pydantic
 python-dotenv
 langchain

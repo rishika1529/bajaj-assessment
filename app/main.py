@@ -5,6 +5,9 @@ from typing import List
 from fastapi import FastAPI
 from pydantic import BaseModel, root_validator
 import requests
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+import os
 
 app = FastAPI(title="BFHL API")
 
@@ -63,34 +66,24 @@ def compute_hcf(arr: List[int]) -> int:
 #         return text.strip().split()[0]
 #     except Exception:
 #         return "UNKNOWN"
+
+
+
+llm = ChatOpenAI(
+    model="gpt-4.1-mini",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    temperature=0
+)
+
+prompt = ChatPromptTemplate.from_template(
+    "Answer in one word only: {question}"
+)
+
 def ask_gemini(question: str) -> str:
-    if not GEMINI_API_KEY:
-        return "AI_KEY_NOT_CONFIGURED"
-
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-
-    prompt = f"Answer in one word only: {question}"
-
-    payload = {
-        "contents": [
-            {"parts": [{"text": prompt}]}
-        ]
-    }
-
-    headers = {"Content-Type": "application/json"}
-
     try:
-        response = requests.post(url, headers=headers, json=payload, timeout=15)
-        data = response.json()
-
-        candidates = data.get("candidates", [])
-        if candidates:
-            parts = candidates[0].get("content", {}).get("parts", [])
-            if parts:
-                return parts[0]["text"].strip().split()[0]
-
-        return "UNKNOWN"
-
+        chain = prompt | llm
+        response = chain.invoke({"question": question})
+        return response.content.strip().split()[0]
     except Exception:
         return "UNKNOWN"
 
