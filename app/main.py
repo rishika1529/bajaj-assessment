@@ -47,22 +47,54 @@ def compute_hcf(arr: List[int]) -> int:
         result = math.gcd(result, num)
     return result
 
+# def ask_gemini(question: str) -> str:
+#     if not GEMINI_API_KEY:
+#         return "AI_KEY_NOT_CONFIGURED"
+#     # url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
+#     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+
+#     payload = {"contents": [{"parts": [{"text": question}]}]}
+#     response = requests.post(url, json=payload, timeout=10)
+#     if response.status_code != 200:
+#         return "AI_ERROR"
+#     data = response.json()
+#     try:
+#         text = data["candidates"][0]["content"]["parts"][0]["text"]
+#         return text.strip().split()[0]
+#     except Exception:
+#         return "UNKNOWN"
 def ask_gemini(question: str) -> str:
     if not GEMINI_API_KEY:
         return "AI_KEY_NOT_CONFIGURED"
-    # url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
+
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
-    payload = {"contents": [{"parts": [{"text": question}]}]}
-    response = requests.post(url, json=payload, timeout=10)
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": question}
+                ]
+            }
+        ]
+    }
+
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.post(url, headers=headers, json=payload)
+
     if response.status_code != 200:
+        print(response.text)
         return "AI_ERROR"
+
     data = response.json()
+
     try:
         text = data["candidates"][0]["content"]["parts"][0]["text"]
         return text.strip().split()[0]
     except Exception:
         return "UNKNOWN"
+
 
 class BFHLRequest(BaseModel):
     fibonacci: int | None = None
